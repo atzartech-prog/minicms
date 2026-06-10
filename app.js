@@ -1,23 +1,42 @@
 // MiniCMS Application Logic
 // Handles client-side view routing, form submissions, dynamic content loading, filtering, live preview rendering,
-// and dual storage modes: Full API Backend Server or client-side LocalStorage fallback (with JSON database exports).
+// dual storage modes (API Backend Server / LocalStorage fallback), and authentication management (Login/Logout).
 
 document.addEventListener('DOMContentLoaded', () => {
   // Application State
   let allPosts = [];
-  let currentView = 'dashboard';
+  let currentView = 'blog-home'; // Default to public blog view
   let postToDeleteId = null;
   let isStaticMode = false; // Toggled dynamically if the API server is unavailable
+  let isAdminLoggedIn = false; // Tracks administrator state
 
-  // DOM Elements - Navigation
+  // DOM Elements - Authentication & Layout
+  const themeSwitch = document.getElementById('checkbox-theme');
+  const adminProfileWrapper = document.getElementById('admin-profile-wrapper');
+  const btnLoginTrigger = document.getElementById('btn-login-trigger');
+  
+  // DOM Elements - Navigation (Sidebar)
+  const sidebar = document.querySelector('.sidebar');
   const navDashboard = document.getElementById('nav-dashboard');
   const navNewPost = document.getElementById('nav-new-post');
   const navExportDb = document.getElementById('nav-export-db');
+  const navViewBlog = document.getElementById('nav-view-blog');
+  const navLogout = document.getElementById('nav-logout');
   const viewSections = document.querySelectorAll('.view-section');
   const pageTitle = document.getElementById('page-title');
-  const themeSwitch = document.getElementById('checkbox-theme');
 
-  // DOM Elements - Dashboard View
+  // DOM Elements - Public Blog View
+  const blogPostsGrid = document.getElementById('blog-posts-grid');
+  const publicSearchInput = document.getElementById('public-search-input');
+  const publicFilterCategory = document.getElementById('public-filter-category');
+
+  // DOM Elements - Login View
+  const loginForm = document.getElementById('login-form');
+  const loginUsernameInput = document.getElementById('login-username');
+  const loginPasswordInput = document.getElementById('login-password');
+  const btnCancelLogin = document.getElementById('btn-cancel-login');
+
+  // DOM Elements - Dashboard View (Admin only)
   const postsTableBody = document.getElementById('posts-table-body');
   const searchInput = document.getElementById('search-input');
   const filterCategory = document.getElementById('filter-category');
@@ -29,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const statPublished = document.getElementById('stat-published');
   const statDrafts = document.getElementById('stat-drafts');
 
-  // DOM Elements - Editor View
+  // DOM Elements - Editor View (Admin only)
   const postForm = document.getElementById('post-form');
   const postIdInput = document.getElementById('post-id');
   const postTitleInput = document.getElementById('post-title');
@@ -48,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewDate = document.getElementById('preview-date');
   const previewBodyContent = document.getElementById('preview-body-content');
 
-  // DOM Elements - Reader View
+  // DOM Elements - Reader View (Shared)
   const btnBackFromReader = document.getElementById('btn-back-from-reader');
   const btnEditFromReader = document.getElementById('btn-edit-from-reader');
   const readCategory = document.getElementById('read-category');
@@ -66,28 +85,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- INITIALIZATION ---
   initTheme();
+  updateAuthUI();
   fetchPosts();
+
+  // --- AUTHENTICATION STATE SYNC ---
+  function updateAuthUI() {
+    isAdminLoggedIn = localStorage.getItem('minicms_logged_in') === 'true';
+    
+    if (isAdminLoggedIn) {
+      document.body.classList.add('admin-logged-in');
+      adminProfileWrapper.style.display = 'flex';
+      btnLoginTrigger.style.display = 'none';
+      
+      // Show admin menu controls
+      navDashboard.style.display = 'flex';
+      navNewPost.style.display = 'flex';
+      navExportDb.style.display = 'flex';
+      navLogout.style.display = 'flex';
+      btnEditFromReader.style.display = 'inline-flex';
+    } else {
+      document.body.classList.remove('admin-logged-in');
+      adminProfileWrapper.style.display = 'none';
+      btnLoginTrigger.style.display = 'inline-flex';
+      
+      // Hide admin menu controls
+      navDashboard.style.display = 'none';
+      navNewPost.style.display = 'none';
+      navExportDb.style.display = 'none';
+      navLogout.style.display = 'none';
+      btnEditFromReader.style.display = 'none';
+      
+      // If currently inside an admin panel, redirect to public home
+      if (currentView === 'dashboard' || currentView === 'editor') {
+        switchView('blog-home');
+      }
+    }
+  }
 
   // --- VIEW ROUTING ROUTINES ---
   const switchView = (targetView) => {
-    currentView = targetView;
-    
-    // Toggle active state in sidebar
-    if (targetView === 'dashboard') {
-      navDashboard.classList.add('active');
-      navNewPost.classList.remove('active');
-      pageTitle.innerText = "Ringkasan Dashboard";
-    } else if (targetView === 'editor') {
-      navDashboard.classList.remove('active');
-      navNewPost.classList.add('active');
-      pageTitle.innerText = "Editor Postingan";
-    } else {
-      navDashboard.classList.remove('active');
-      navNewPost.classList.remove('active');
-      pageTitle.innerText = "Pembaca Blog";
+    // Auth Guard check for admin-only views
+    if ((targetView === 'dashboard' || targetView === 'editor') && !isAdminLoggedIn) {
+      showToast('Akses ditolak. Silakan login terlebih dahulu.', 'error');
+      targetView = 'login';
     }
 
-    // Slide and view sections toggle
+    currentView = targetView;
+    
+    // Toggle active sidebar selections
+    navDashboard.classList.remove('active');
+    navNewPost.classList.remove('active');
+    navViewBlog.classList.remove('active');
+    
+    if (targetView === 'dashboard') {
+      navDashboard.classList.add('active');
+      pageTitle.innerText = "Ringkasan Dashboard";
+    } else if (targetView === 'editor') {
+      navNewPost.classList.add('active');
+      pageTitle.innerText = "Editor Postingan";
+    } else if (targetView === 'blog-home') {
+      navViewBlog.classList.add('active');
+      pageTitle.innerText = "Halaman Blog Utama";
+    } else if (targetView === 'login') {
+      pageTitle.innerText = "Login Administrator";
+    } else {
+      pageTitle.innerText = "Pembaca Artikel";
+    }
+
+    // Toggle DOM sections display
     viewSections.forEach(section => {
       if (section.id === `${targetView}-view`) {
         section.classList.add('active');
@@ -99,6 +164,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // Reset window scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // --- LOGIN / LOGOUT HANDLERS ---
+  btnLoginTrigger.addEventListener('click', () => {
+    switchView('login');
+  });
+
+  btnCancelLogin.addEventListener('click', () => {
+    switchView('blog-home');
+  });
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = loginUsernameInput.value.trim();
+    const pass = loginPasswordInput.value;
+
+    if (user === 'admin' && pass === 'bismillah') {
+      localStorage.setItem('minicms_logged_in', 'true');
+      showToast('Login Berhasil! Selamat datang di Panel Admin.', 'success');
+      updateAuthUI();
+      loginForm.reset();
+      switchView('dashboard');
+    } else {
+      showToast('Username atau password Anda salah!', 'error');
+    }
+  });
+
+  navLogout.addEventListener('click', () => {
+    localStorage.removeItem('minicms_logged_in');
+    showToast('Anda berhasil keluar dari sistem.', 'success');
+    updateAuthUI();
+    switchView('blog-home');
+  });
 
   // --- THEME MANAGEMENT ---
   function initTheme() {
@@ -167,9 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('minicms_posts');
       
       updateStats();
-      renderPostsTable(allPosts);
+      renderAdminTable(allPosts);
+      renderPublicBlogGrid();
     } catch (err) {
-      console.log('Backend server API offline or running static. Falling back to local storage mode.', err);
+      console.log('Backend server API offline. Falling back to local storage static mode.', err);
       isStaticMode = true;
       statusDot.className = 'status-dot offline';
       statusText.innerText = 'Local Sync (Static)';
@@ -179,7 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (localData) {
         allPosts = JSON.parse(localData);
         updateStats();
-        renderPostsTable(allPosts);
+        renderAdminTable(allPosts);
+        renderPublicBlogGrid();
       } else {
         // Fallback to loading default file from repository structure
         try {
@@ -188,7 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
             allPosts = await staticResponse.json();
             localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
             updateStats();
-            renderPostsTable(allPosts);
+            renderAdminTable(allPosts);
+            renderPublicBlogGrid();
             showToast('Memuat data awal dari data/posts.json', 'success');
           } else {
             throw new Error('Static file not available');
@@ -209,7 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
           ];
           localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
           updateStats();
-          renderPostsTable(allPosts);
+          renderAdminTable(allPosts);
+          renderPublicBlogGrid();
           showToast('Menggunakan data contoh bawaan.', 'warning');
         }
       }
@@ -228,11 +329,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatDate(isoString) {
     if (!isoString) return '-';
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(isoString).toLocaleDateString('id-ID', options);
   }
 
-  function renderPostsTable(posts) {
+  // --- RENDER PUBLIC BLOG GRID ---
+  function renderPublicBlogGrid() {
+    const publishedPosts = allPosts.filter(p => p.status === 'published');
+    
+    // Applying public search and filters
+    const query = publicSearchInput.value.toLowerCase();
+    const category = publicFilterCategory.value;
+    
+    const filtered = publishedPosts.filter(post => {
+      const matchesSearch = post.title.toLowerCase().includes(query) || 
+                            (post.summary && post.summary.toLowerCase().includes(query)) ||
+                            post.content.toLowerCase().includes(query);
+      const matchesCategory = (category === 'all' || post.category === category);
+      return matchesSearch && matchesCategory;
+    });
+
+    if (filtered.length === 0) {
+      blogPostsGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48" style="margin-bottom: 1rem; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          <p>Belum ada artikel yang dipublikasikan dalam pencarian ini.</p>
+        </div>`;
+      return;
+    }
+
+    blogPostsGrid.innerHTML = '';
+    filtered.forEach(post => {
+      const card = document.createElement('article');
+      card.className = 'blog-card';
+      
+      const textOnlyContent = post.content.replace(/<[^>]*>/g, '');
+      const summaryText = post.summary || (textOnlyContent.substring(0, 140) + '...');
+      
+      card.innerHTML = `
+        <div class="blog-card-meta">
+          <span class="blog-card-category">${escapeHtml(post.category)}</span>
+          <span class="blog-card-date">${formatDate(post.date)}</span>
+        </div>
+        <h3 class="blog-card-title" data-id="${post.id}">${escapeHtml(post.title)}</h3>
+        <p class="blog-card-summary">${escapeHtml(summaryText)}</p>
+        <div class="blog-card-footer">
+          <button class="btn btn-secondary btn-sm read-more-btn" data-id="${post.id}">
+            Baca Selengkapnya
+          </button>
+        </div>
+      `;
+      blogPostsGrid.appendChild(card);
+    });
+
+    // Attach click events on public cards
+    document.querySelectorAll('.blog-card-title, .read-more-btn').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.getAttribute('data-id');
+        openReader(id);
+      });
+    });
+  }
+
+  // --- RENDER ADMIN POSTS LIST ---
+  function renderAdminTable(posts) {
     if (posts.length === 0) {
       postsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Tidak ada postingan ditemukan.</td></tr>`;
       return;
@@ -303,8 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- SEARCH AND FILTERING ---
-  const applyFilters = () => {
+  // --- SEARCH AND FILTERING (ADMIN PANEL) ---
+  const applyAdminFilters = () => {
     const query = searchInput.value.toLowerCase();
     const cat = filterCategory.value;
     const stat = filterStatus.value;
@@ -319,12 +479,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return matchesSearch && matchesCategory && matchesStatus;
     });
 
-    renderPostsTable(filtered);
+    renderAdminTable(filtered);
   };
 
-  searchInput.addEventListener('input', applyFilters);
-  filterCategory.addEventListener('change', applyFilters);
-  filterStatus.addEventListener('change', applyFilters);
+  searchInput.addEventListener('input', applyAdminFilters);
+  filterCategory.addEventListener('change', applyAdminFilters);
+  filterStatus.addEventListener('change', applyAdminFilters);
+
+  // Search & Filter listeners for Public Blog
+  publicSearchInput.addEventListener('input', renderPublicBlogGrid);
+  publicFilterCategory.addEventListener('change', renderPublicBlogGrid);
 
   // --- READER VIEW ---
   function openReader(id) {
@@ -345,12 +509,23 @@ document.addEventListener('DOMContentLoaded', () => {
       openEditor(post.id);
     };
 
+    // Toggle Back Button label and destination based on who is reading
+    if (isAdminLoggedIn) {
+      btnBackFromReader.innerHTML = `
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kembali ke Dashboard
+      `;
+      btnBackFromReader.onclick = () => switchView('dashboard');
+    } else {
+      btnBackFromReader.innerHTML = `
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Kembali ke Blog
+      `;
+      btnBackFromReader.onclick = () => switchView('blog-home');
+    }
+
     switchView('reader');
   }
-
-  btnBackFromReader.addEventListener('click', () => {
-    switchView('dashboard');
-  });
 
   // --- EDITOR VIEW (CREATE / EDIT) ---
   function openEditor(id = null) {
@@ -442,9 +617,10 @@ document.addEventListener('DOMContentLoaded', () => {
   btnBackDashboard.addEventListener('click', () => switchView('dashboard'));
   btnCancelEdit.addEventListener('click', () => switchView('dashboard'));
   
-  // Sidebar shortcuts
+  // Navigation trigger shortcuts
   navDashboard.addEventListener('click', () => switchView('dashboard'));
   navNewPost.addEventListener('click', () => openEditor());
+  navViewBlog.addEventListener('click', () => switchView('blog-home'));
   btnCreateShortcut.addEventListener('click', () => openEditor());
 
   // --- DATABASE EXPORT (JSON download) ---
@@ -529,7 +705,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast("Klik 'Ekspor JSON' di menu untuk menyimpan perubahan permanen ke database file.", 'warning');
       
       updateStats();
-      renderPostsTable(allPosts);
+      renderAdminTable(allPosts);
+      renderPublicBlogGrid();
       switchView('dashboard');
     } else {
       // REST API server execution
@@ -579,7 +756,8 @@ document.addEventListener('DOMContentLoaded', () => {
       postToDeleteId = null;
       
       updateStats();
-      renderPostsTable(allPosts);
+      renderAdminTable(allPosts);
+      renderPublicBlogGrid();
       
       if (currentView === 'reader') {
         switchView('dashboard');

@@ -24,17 +24,25 @@
       </div>
       
       <nav class="nav-menu">
-        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+        <button class="nav-item" data-view="dashboard" id="nav-dashboard" style="display: none;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
           Dashboard
         </button>
-        <button class="nav-item" data-view="editor" id="nav-new-post">
+        <button class="nav-item" data-view="editor" id="nav-new-post" style="display: none;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Tulis Post
         </button>
-        <button class="nav-item" id="nav-export-db">
+        <button class="nav-item" id="nav-export-db" style="display: none;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Ekspor JSON
+        </button>
+        <button class="nav-item active" data-view="blog-home" id="nav-view-blog">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Halaman Blog
+        </button>
+        <button class="nav-item" id="nav-logout" style="display: none; color: var(--danger);">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout Admin
         </button>
       </nav>
       
@@ -64,20 +72,50 @@
         <div class="topbar-title">
           <h1 id="page-title">Ringkasan Dashboard</h1>
         </div>
-        <div class="user-profile">
+        <div class="user-profile" id="admin-profile-wrapper" style="display: none;">
           <div class="profile-info">
             <span class="profile-name">Administrator</span>
             <span class="profile-role">Owner</span>
           </div>
           <div class="profile-avatar">A</div>
         </div>
+        <button class="btn btn-primary btn-sm" id="btn-login-trigger">Login Admin</button>
       </header>
 
       <!-- View Containers -->
       <div class="content-body">
         
+        <!-- PUBLIC BLOG HOME VIEW -->
+        <section id="blog-home-view" class="view-section active">
+          <div class="blog-hero">
+            <h1>Jelajahi Artikel Terbaru</h1>
+            <p>Berbagi wawasan, panduan teknologi, dan kabar terbaru seputar MiniCMS.</p>
+          </div>
+          
+          <div class="controls-bar">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="public-search-input" placeholder="Cari artikel...">
+            </div>
+            
+            <div class="filters">
+              <select id="public-filter-category" class="select-input">
+                <option value="all">Semua Kategori</option>
+                <option value="Umum">Umum</option>
+                <option value="Panduan">Panduan</option>
+                <option value="Berita">Berita</option>
+                <option value="Teknologi">Teknologi</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="blog-grid" id="blog-posts-grid">
+            <!-- Dynamic blog cards will be injected here -->
+          </div>
+        </section>
+        
         <!-- DASHBOARD VIEW -->
-        <section id="dashboard-view" class="view-section active">
+        <section id="dashboard-view" class="view-section">
           <!-- Stats Widgets Grid -->
           <div class="stats-grid">
             <div class="stat-card">
@@ -283,6 +321,34 @@
               <!-- Post HTML content will be rendered here -->
             </section>
           </article>
+        </section>
+
+        <!-- LOGIN VIEW -->
+        <section id="login-view" class="view-section">
+          <div class="login-wrapper">
+            <div class="login-card card">
+              <div class="brand-logo" style="margin: 0 auto 1.5rem;">MC</div>
+              <h2>Login Administrator</h2>
+              <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Masukkan kredensial Anda untuk masuk ke dashboard admin.</p>
+              
+              <form id="login-form">
+                <div class="form-group">
+                  <label for="login-username">Username</label>
+                  <input type="text" id="login-username" required placeholder="Contoh: admin">
+                </div>
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                  Masuk Dashboard
+                </button>
+              </form>
+              <button class="btn-text" id="btn-cancel-login" style="margin-top: 1.5rem; width: 100%; justify-content: center;">
+                Kembali ke Blog
+              </button>
+            </div>
+          </div>
         </section>
 
       </div>
