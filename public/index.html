@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniCMS - Flat-File Content Management System</title>
+  <meta name="description" content="MiniCMS: Sistem manajemen konten ultra-ringan menggunakan flat-file JSON. Cepat, elegan, dan tanpa database SQL.">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode"> <!-- Dark mode default for premium feel -->
+  
+  <!-- App Container -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">MC</div>
+        <span class="brand-name">Mini<span>CMS</span></span>
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-view="editor" id="nav-new-post">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Tulis Post
+        </button>
+        <button class="nav-item" id="nav-export-db">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Ekspor JSON
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="theme-switch-wrapper">
+          <span class="theme-label">Mode Terang</span>
+          <label class="theme-switch" for="checkbox-theme">
+            <input type="checkbox" id="checkbox-theme" />
+            <div class="slider round"></div>
+          </label>
+        </div>
+        <div class="db-status">
+          <span class="status-dot online" id="db-status-dot"></span>
+          <span class="status-text" id="db-status-text">Flatfile JSON Connected</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="menu-toggle" id="menu-toggle">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </div>
+        <div class="topbar-title">
+          <h1 id="page-title">Ringkasan Dashboard</h1>
+        </div>
+        <div class="user-profile">
+          <div class="profile-info">
+            <span class="profile-name">Administrator</span>
+            <span class="profile-role">Owner</span>
+          </div>
+          <div class="profile-avatar">A</div>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="content-body">
+        
+        <!-- DASHBOARD VIEW -->
+        <section id="dashboard-view" class="view-section active">
+          <!-- Stats Widgets Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <div class="stat-details">
+                <h3 id="stat-total">0</h3>
+                <p>Total Postingan</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="stat-details">
+                <h3 id="stat-published">0</h3>
+                <p>Published</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon yellow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="stat-details">
+                <h3 id="stat-drafts">0</h3>
+                <p>Drafts</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="controls-bar">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="search-input" placeholder="Cari judul postingan...">
+            </div>
+            
+            <div class="filters">
+              <select id="filter-category" class="select-input">
+                <option value="all">Semua Kategori</option>
+                <option value="Umum">Umum</option>
+                <option value="Panduan">Panduan</option>
+                <option value="Berita">Berita</option>
+                <option value="Teknologi">Teknologi</option>
+              </select>
+              
+              <select id="filter-status" class="select-input">
+                <option value="all">Semua Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+              
+              <button class="btn btn-primary" id="btn-create-shortcut">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Post Baru
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container card">
+            <table class="posts-table" id="posts-table">
+              <thead>
+                <tr>
+                  <th>Judul</th>
+                  <th>Kategori</th>
+                  <th>Tanggal Buat</th>
+                  <th>Status</th>
+                  <th class="actions-head">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="posts-table-body">
+                <!-- Posts will be generated dynamically -->
+                <tr class="table-loading">
+                  <td colspan="5">Memuat postingan...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- EDITOR VIEW -->
+        <section id="editor-view" class="view-section">
+          <div class="editor-header-bar">
+            <button class="btn-text" id="btn-back-dashboard">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Kembali ke Dashboard
+            </button>
+            <h2 id="editor-action-title">Buat Postingan Baru</h2>
+          </div>
+
+          <form id="post-form" class="editor-form">
+            <input type="hidden" id="post-id">
+            
+            <div class="editor-main-grid">
+              
+              <!-- Left side inputs -->
+              <div class="editor-fields-pane card">
+                <div class="form-group">
+                  <label for="post-title">Judul Postingan</label>
+                  <input type="text" id="post-title" required placeholder="Contoh: 10 Fitur Unggulan MiniCMS">
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="post-category">Kategori</label>
+                    <select id="post-category" class="select-input">
+                      <option value="Umum">Umum</option>
+                      <option value="Panduan">Panduan</option>
+                      <option value="Berita">Berita</option>
+                      <option value="Teknologi">Teknologi</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="post-status">Status</label>
+                    <select id="post-status" class="select-input">
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="post-summary">Ringkasan Pendek</label>
+                  <textarea id="post-summary" rows="2" placeholder="Tuliskan ringkasan singkat postingan ini (muncul di daftar halaman depan)..."></textarea>
+                </div>
+
+                <div class="form-group text-editor-group">
+                  <div class="editor-toolbar">
+                    <label>Konten Postingan (HTML didukung)</label>
+                    <div class="toolbar-buttons">
+                      <button type="button" class="tb-btn" data-tag="h2" title="Heading 2">H2</button>
+                      <button type="button" class="tb-btn" data-tag="h3" title="Heading 3">H3</button>
+                      <button type="button" class="tb-btn" data-tag="strong" title="Bold"><b>B</b></button>
+                      <button type="button" class="tb-btn" data-tag="em" title="Italic"><i>I</i></button>
+                      <button type="button" class="tb-btn" data-tag="ul" title="List Bullets">List</button>
+                      <button type="button" class="tb-btn" data-tag="code" title="Code Block">&lt;/&gt;</button>
+                      <button type="button" class="tb-btn" data-tag="a" title="Insert Link">Link</button>
+                    </div>
+                  </div>
+                  <textarea id="post-content" required placeholder="Tulis artikel Anda di sini... HTML tags didukung sepenuhnya untuk styling custom."></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" id="btn-cancel-edit">Batal</button>
+                  <button type="submit" class="btn btn-primary" id="btn-save-post">
+                    <svg class="icon btn-save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Simpan Postingan
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right side live preview pane -->
+              <div class="editor-preview-pane card">
+                <div class="preview-header">
+                  <span>Pratinjau Live</span>
+                  <span class="preview-badge">Tampilan Blog</span>
+                </div>
+                <div class="live-preview-content">
+                  <h1 class="preview-title" id="preview-title">Judul Postingan</h1>
+                  <div class="preview-meta">
+                    <span class="preview-category" id="preview-category">Kategori</span>
+                    <span class="preview-date" id="preview-date">Tanggal</span>
+                  </div>
+                  <div class="preview-body-content" id="preview-body-content">
+                    Konten artikel Anda akan dirender secara real-time di sini...
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </form>
+        </section>
+
+        <!-- READER VIEW -->
+        <section id="reader-view" class="view-section">
+          <div class="reader-header-bar">
+            <button class="btn-text" id="btn-back-from-reader">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              Kembali ke Dashboard
+            </button>
+            <div class="reader-actions">
+              <button class="btn btn-secondary btn-sm" id="btn-edit-from-reader">Edit Post</button>
+            </div>
+          </div>
+
+          <article class="blog-post-card card">
+            <header class="post-header">
+              <div class="post-meta-details">
+                <span class="badge badge-category" id="read-category">Kategori</span>
+                <span class="post-date" id="read-date">1 Januari 2026</span>
+              </div>
+              <h1 class="post-title" id="read-title">Judul Postingan</h1>
+              <p class="post-summary-lead" id="read-summary">Ini adalah ringkasan postingan.</p>
+            </header>
+            
+            <hr class="divider">
+            
+            <section class="post-body-content" id="read-content">
+              <!-- Post HTML content will be rendered here -->
+            </section>
+          </article>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal-backdrop" id="delete-modal">
+    <div class="modal card">
+      <div class="modal-icon warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h2>Hapus Postingan?</h2>
+      <p>Apakah Anda yakin ingin menghapus postingan <strong id="delete-post-title">Judul</strong>? Tindakan ini tidak dapat dibatalkan.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btn-close-modal">Batal</button>
+        <button class="btn btn-danger" id="btn-confirm-delete">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- App script -->
+  <script src="app.js"></script>
+</body>
+</html>

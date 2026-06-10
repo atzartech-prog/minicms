@@ -1,0 +1,12 @@
+[
+  {
+    "id": "1",
+    "title": "Selamat Datang di MiniCMS",
+    "slug": "selamat-datang-di-minicms",
+    "summary": "Selamat datang di aplikasi MiniCMS Anda yang baru. Pelajari cara kerja flat-file database JSON di sini.",
+    "content": "<h2>Selamat Datang di MiniCMS!</h2><p>Ini adalah postingan pertama Anda yang dimuat langsung dari flat-file database <code>posts.json</code>.</p><p>MiniCMS dibangun dengan teknologi sederhana namun bertenaga:</p><ul><li><strong>Express.js</strong> untuk backend server & API</li><li><strong>HTML5, CSS3, & Vanilla JS</strong> untuk antarmuka pengguna yang cepat dan responsif</li><li><strong>Flat-file JSON</strong> sebagai penyimpanan data tanpa perlu database SQL/NoSQL eksternal</li></ul><p>Anda dapat mengedit postingan ini, menghapusnya, atau menambahkan postingan baru melalui dashboard admin yang telah disediakan. Selamat mencoba!</p>",
+    "category": "Panduan",
+    "date": "2026-06-11T04:20:00.000Z",
+    "status": "published"
+  }
+]

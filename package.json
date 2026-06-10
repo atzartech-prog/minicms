@@ -1,0 +1,21 @@
+{
+  "name": "minicms",
+  "version": "1.0.0",
+  "description": "A lightweight Flat-File JSON CMS using HTML, CSS, JS, and Node.js/Express.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "keywords": [
+    "cms",
+    "flatfile",
+    "json",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC"
+}
