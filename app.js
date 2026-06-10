@@ -94,26 +94,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (isAdminLoggedIn) {
       document.body.classList.add('admin-logged-in');
-      adminProfileWrapper.style.display = 'flex';
-      btnLoginTrigger.style.display = 'none';
+      if (adminProfileWrapper) adminProfileWrapper.style.display = 'flex';
+      if (btnLoginTrigger) btnLoginTrigger.style.display = 'none';
       
       // Show admin menu controls
-      navDashboard.style.display = 'flex';
-      navNewPost.style.display = 'flex';
-      navExportDb.style.display = 'flex';
-      navLogout.style.display = 'flex';
-      btnEditFromReader.style.display = 'inline-flex';
+      if (navDashboard) navDashboard.style.display = 'flex';
+      if (navNewPost) navNewPost.style.display = 'flex';
+      if (navExportDb) navExportDb.style.display = 'flex';
+      if (navLogout) navLogout.style.display = 'flex';
+      if (btnEditFromReader) btnEditFromReader.style.display = 'inline-flex';
     } else {
       document.body.classList.remove('admin-logged-in');
-      adminProfileWrapper.style.display = 'none';
-      btnLoginTrigger.style.display = 'inline-flex';
+      if (adminProfileWrapper) adminProfileWrapper.style.display = 'none';
+      if (btnLoginTrigger) btnLoginTrigger.style.display = 'inline-flex';
       
       // Hide admin menu controls
-      navDashboard.style.display = 'none';
-      navNewPost.style.display = 'none';
-      navExportDb.style.display = 'none';
-      navLogout.style.display = 'none';
-      btnEditFromReader.style.display = 'none';
+      if (navDashboard) navDashboard.style.display = 'none';
+      if (navNewPost) navNewPost.style.display = 'none';
+      if (navExportDb) navExportDb.style.display = 'none';
+      if (navLogout) navLogout.style.display = 'none';
+      if (btnEditFromReader) btnEditFromReader.style.display = 'none';
       
       // If currently inside an admin panel, redirect to public home
       if (currentView === 'dashboard' || currentView === 'editor') {
@@ -133,23 +133,23 @@ document.addEventListener('DOMContentLoaded', () => {
     currentView = targetView;
     
     // Toggle active sidebar selections
-    navDashboard.classList.remove('active');
-    navNewPost.classList.remove('active');
-    navViewBlog.classList.remove('active');
+    if (navDashboard) navDashboard.classList.remove('active');
+    if (navNewPost) navNewPost.classList.remove('active');
+    if (navViewBlog) navViewBlog.classList.remove('active');
     
     if (targetView === 'dashboard') {
-      navDashboard.classList.add('active');
-      pageTitle.innerText = "Ringkasan Dashboard";
+      if (navDashboard) navDashboard.classList.add('active');
+      if (pageTitle) pageTitle.innerText = "Ringkasan Dashboard";
     } else if (targetView === 'editor') {
-      navNewPost.classList.add('active');
-      pageTitle.innerText = "Editor Postingan";
+      if (navNewPost) navNewPost.classList.add('active');
+      if (pageTitle) pageTitle.innerText = "Editor Postingan";
     } else if (targetView === 'blog-home') {
-      navViewBlog.classList.add('active');
-      pageTitle.innerText = "Halaman Blog Utama";
+      if (navViewBlog) navViewBlog.classList.add('active');
+      if (pageTitle) pageTitle.innerText = "Halaman Blog Utama";
     } else if (targetView === 'login') {
-      pageTitle.innerText = "Login Administrator";
+      if (pageTitle) pageTitle.innerText = "Login Administrator";
     } else {
-      pageTitle.innerText = "Pembaca Artikel";
+      if (pageTitle) pageTitle.innerText = "Pembaca Artikel";
     }
 
     // Toggle DOM sections display
@@ -166,36 +166,45 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // --- LOGIN / LOGOUT HANDLERS ---
-  btnLoginTrigger.addEventListener('click', () => {
-    switchView('login');
-  });
+  if (btnLoginTrigger) {
+    btnLoginTrigger.addEventListener('click', () => {
+      console.log('Login Admin button clicked. Switching to login view.');
+      switchView('login');
+    });
+  }
 
-  btnCancelLogin.addEventListener('click', () => {
-    switchView('blog-home');
-  });
+  if (btnCancelLogin) {
+    btnCancelLogin.addEventListener('click', () => {
+      switchView('blog-home');
+    });
+  }
 
-  loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const user = loginUsernameInput.value.trim();
-    const pass = loginPasswordInput.value;
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const user = loginUsernameInput.value.trim();
+      const pass = loginPasswordInput.value;
 
-    if (user === 'admin' && pass === 'bismillah') {
-      localStorage.setItem('minicms_logged_in', 'true');
-      showToast('Login Berhasil! Selamat datang di Panel Admin.', 'success');
+      if (user === 'admin' && pass === 'bismillah') {
+        localStorage.setItem('minicms_logged_in', 'true');
+        showToast('Login Berhasil! Selamat datang di Panel Admin.', 'success');
+        updateAuthUI();
+        loginForm.reset();
+        switchView('dashboard');
+      } else {
+        showToast('Username atau password Anda salah!', 'error');
+      }
+    });
+  }
+
+  if (navLogout) {
+    navLogout.addEventListener('click', () => {
+      localStorage.removeItem('minicms_logged_in');
+      showToast('Anda berhasil keluar dari sistem.', 'success');
       updateAuthUI();
-      loginForm.reset();
-      switchView('dashboard');
-    } else {
-      showToast('Username atau password Anda salah!', 'error');
-    }
-  });
-
-  navLogout.addEventListener('click', () => {
-    localStorage.removeItem('minicms_logged_in');
-    showToast('Anda berhasil keluar dari sistem.', 'success');
-    updateAuthUI();
-    switchView('blog-home');
-  });
+      switchView('blog-home');
+    });
+  }
 
   // --- THEME MANAGEMENT ---
   function initTheme() {
@@ -204,25 +213,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (savedTheme === 'light') {
       document.body.classList.remove('dark-mode');
-      themeSwitch.checked = true; // Slider switches 'on' for light mode
+      if (themeSwitch) themeSwitch.checked = true; // Slider switches 'on' for light mode
     } else if (savedTheme === 'dark' || systemPrefersDark) {
       document.body.classList.add('dark-mode');
-      themeSwitch.checked = false;
+      if (themeSwitch) themeSwitch.checked = false;
     }
   }
 
-  themeSwitch.addEventListener('change', () => {
-    if (themeSwitch.checked) {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    }
-  });
+  if (themeSwitch) {
+    themeSwitch.addEventListener('change', () => {
+      if (themeSwitch.checked) {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  }
 
   // --- TOAST NOTIFICATIONS ---
   const showToast = (message, type = 'success') => {
+    if (!toastContainer) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
@@ -257,8 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
       allPosts = await response.json();
       isStaticMode = false;
       
-      statusDot.className = 'status-dot online';
-      statusText.innerText = 'Flatfile API Connected';
+      if (statusDot) statusDot.className = 'status-dot online';
+      if (statusText) statusText.innerText = 'Flatfile API Connected';
       
       // Clean local storage since API server is source of truth
       localStorage.removeItem('minicms_posts');
@@ -269,8 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.log('Backend server API offline. Falling back to local storage static mode.', err);
       isStaticMode = true;
-      statusDot.className = 'status-dot offline';
-      statusText.innerText = 'Local Sync (Static)';
+      if (statusDot) statusDot.className = 'status-dot offline';
+      if (statusText) statusText.innerText = 'Local Sync (Static)';
       
       // Check if LocalStorage already contains database records
       const localData = localStorage.getItem('minicms_posts');
@@ -322,9 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const published = allPosts.filter(p => p.status === 'published').length;
     const drafts = allPosts.filter(p => p.status === 'draft').length;
 
-    statTotal.innerText = total;
-    statPublished.innerText = published;
-    statDrafts.innerText = drafts;
+    if (statTotal) statTotal.innerText = total;
+    if (statPublished) statPublished.innerText = published;
+    if (statDrafts) statDrafts.innerText = drafts;
   }
 
   function formatDate(isoString) {
@@ -335,11 +347,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- RENDER PUBLIC BLOG GRID ---
   function renderPublicBlogGrid() {
+    if (!blogPostsGrid) return;
     const publishedPosts = allPosts.filter(p => p.status === 'published');
     
     // Applying public search and filters
-    const query = publicSearchInput.value.toLowerCase();
-    const category = publicFilterCategory.value;
+    const query = publicSearchInput ? publicSearchInput.value.toLowerCase() : '';
+    const category = publicFilterCategory ? publicFilterCategory.value : 'all';
     
     const filtered = publishedPosts.filter(post => {
       const matchesSearch = post.title.toLowerCase().includes(query) || 
@@ -393,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- RENDER ADMIN POSTS LIST ---
   function renderAdminTable(posts) {
+    if (!postsTableBody) return;
     if (posts.length === 0) {
       postsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Tidak ada postingan ditemukan.</td></tr>`;
       return;
@@ -456,8 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const post = allPosts.find(p => p.id === id);
         if (post) {
           postToDeleteId = id;
-          deletePostTitle.innerText = post.title;
-          deleteModal.classList.add('open');
+          if (deletePostTitle) deletePostTitle.innerText = post.title;
+          if (deleteModal) deleteModal.classList.add('open');
         }
       });
     });
@@ -465,9 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- SEARCH AND FILTERING (ADMIN PANEL) ---
   const applyAdminFilters = () => {
-    const query = searchInput.value.toLowerCase();
-    const cat = filterCategory.value;
-    const stat = filterStatus.value;
+    const query = searchInput ? searchInput.value.toLowerCase() : '';
+    const cat = filterCategory ? filterCategory.value : 'all';
+    const stat = filterStatus ? filterStatus.value : 'all';
 
     const filtered = allPosts.filter(post => {
       const matchesSearch = post.title.toLowerCase().includes(query) || 
@@ -482,13 +496,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminTable(filtered);
   };
 
-  searchInput.addEventListener('input', applyAdminFilters);
-  filterCategory.addEventListener('change', applyAdminFilters);
-  filterStatus.addEventListener('change', applyAdminFilters);
+  if (searchInput) searchInput.addEventListener('input', applyAdminFilters);
+  if (filterCategory) filterCategory.addEventListener('change', applyAdminFilters);
+  if (filterStatus) filterStatus.addEventListener('change', applyAdminFilters);
 
   // Search & Filter listeners for Public Blog
-  publicSearchInput.addEventListener('input', renderPublicBlogGrid);
-  publicFilterCategory.addEventListener('change', renderPublicBlogGrid);
+  if (publicSearchInput) publicSearchInput.addEventListener('input', renderPublicBlogGrid);
+  if (publicFilterCategory) publicFilterCategory.addEventListener('change', renderPublicBlogGrid);
 
   // --- READER VIEW ---
   function openReader(id) {
@@ -498,30 +512,34 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    readCategory.innerText = post.category;
-    readDate.innerText = formatDate(post.date || post.createdAt);
-    readTitle.innerText = post.title;
-    readSummary.innerText = post.summary || '';
-    readContent.innerHTML = post.content;
+    if (readCategory) readCategory.innerText = post.category;
+    if (readDate) readDate.innerText = formatDate(post.date || post.createdAt);
+    if (readTitle) readTitle.innerText = post.title;
+    if (readSummary) readSummary.innerText = post.summary || '';
+    if (readContent) readContent.innerHTML = post.content;
     
     // Bind reader edit button action
-    btnEditFromReader.onclick = () => {
-      openEditor(post.id);
-    };
+    if (btnEditFromReader) {
+      btnEditFromReader.onclick = () => {
+        openEditor(post.id);
+      };
+    }
 
     // Toggle Back Button label and destination based on who is reading
-    if (isAdminLoggedIn) {
-      btnBackFromReader.innerHTML = `
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Kembali ke Dashboard
-      `;
-      btnBackFromReader.onclick = () => switchView('dashboard');
-    } else {
-      btnBackFromReader.innerHTML = `
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Kembali ke Blog
-      `;
-      btnBackFromReader.onclick = () => switchView('blog-home');
+    if (btnBackFromReader) {
+      if (isAdminLoggedIn) {
+        btnBackFromReader.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Kembali ke Dashboard
+        `;
+        btnBackFromReader.onclick = () => switchView('dashboard');
+      } else {
+        btnBackFromReader.innerHTML = `
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Kembali ke Blog
+        `;
+        btnBackFromReader.onclick = () => switchView('blog-home');
+      }
     }
 
     switchView('reader');
@@ -529,8 +547,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- EDITOR VIEW (CREATE / EDIT) ---
   function openEditor(id = null) {
-    postForm.reset();
-    postIdInput.value = '';
+    if (postForm) postForm.reset();
+    if (postIdInput) postIdInput.value = '';
     
     if (id) {
       // Edit Post
@@ -540,18 +558,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      postIdInput.value = post.id;
-      postTitleInput.value = post.title;
-      postCategorySelect.value = post.category || 'Umum';
-      postStatusSelect.value = post.status || 'draft';
-      postSummaryTextarea.value = post.summary || '';
-      postContentTextarea.value = post.content;
+      if (postIdInput) postIdInput.value = post.id;
+      if (postTitleInput) postTitleInput.value = post.title;
+      if (postCategorySelect) postCategorySelect.value = post.category || 'Umum';
+      if (postStatusSelect) postStatusSelect.value = post.status || 'draft';
+      if (postSummaryTextarea) postSummaryTextarea.value = post.summary || '';
+      if (postContentTextarea) postContentTextarea.value = post.content;
       
-      editorActionTitle.innerText = "Edit Postingan";
+      if (editorActionTitle) editorActionTitle.innerText = "Edit Postingan";
       updatePreview(post.date || new Date().toISOString());
     } else {
       // Create New Post
-      editorActionTitle.innerText = "Buat Postingan Baru";
+      if (editorActionTitle) editorActionTitle.innerText = "Buat Postingan Baru";
       updatePreview(new Date().toISOString());
     }
 
@@ -560,19 +578,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Live preview bindings
   const updatePreview = (forcedDate = null) => {
-    previewTitle.innerText = postTitleInput.value || 'Judul Postingan Baru';
-    previewCategory.innerText = postCategorySelect.value;
+    if (previewTitle) previewTitle.innerText = postTitleInput ? postTitleInput.value : 'Judul Postingan Baru';
+    if (previewCategory) previewCategory.innerText = postCategorySelect ? postCategorySelect.value : 'Umum';
     
     const displayDate = forcedDate || new Date().toISOString();
-    previewDate.innerText = formatDate(displayDate);
+    if (previewDate) previewDate.innerText = formatDate(displayDate);
     
     // Live render html body content
-    previewBodyContent.innerHTML = postContentTextarea.value || '<p style="color: var(--text-muted); font-style: italic;">Mulai ketik konten artikel Anda di editor untuk melihat pratinjau langsung...</p>';
+    if (previewBodyContent) {
+      previewBodyContent.innerHTML = (postContentTextarea && postContentTextarea.value) ? postContentTextarea.value : '<p style="color: var(--text-muted); font-style: italic;">Mulai ketik konten artikel Anda di editor untuk melihat pratinjau langsung...</p>';
+    }
   };
 
-  postTitleInput.addEventListener('input', () => updatePreview());
-  postCategorySelect.addEventListener('change', () => updatePreview());
-  postContentTextarea.addEventListener('input', () => updatePreview());
+  if (postTitleInput) postTitleInput.addEventListener('input', () => updatePreview());
+  if (postCategorySelect) postCategorySelect.addEventListener('change', () => updatePreview());
+  if (postContentTextarea) postContentTextarea.addEventListener('input', () => updatePreview());
 
   // Text editor custom HTML tag injection
   toolbarButtons.forEach(btn => {
@@ -583,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function insertHTMLTag(tag) {
+    if (!postContentTextarea) return;
     const start = postContentTextarea.selectionStart;
     const end = postContentTextarea.selectionEnd;
     const text = postContentTextarea.value;
@@ -614,186 +635,196 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Cancel edit buttons
-  btnBackDashboard.addEventListener('click', () => switchView('dashboard'));
-  btnCancelEdit.addEventListener('click', () => switchView('dashboard'));
+  if (btnBackDashboard) btnBackDashboard.addEventListener('click', () => switchView('dashboard'));
+  if (btnCancelEdit) btnCancelEdit.addEventListener('click', () => switchView('dashboard'));
   
   // Navigation trigger shortcuts
-  navDashboard.addEventListener('click', () => switchView('dashboard'));
-  navNewPost.addEventListener('click', () => openEditor());
-  navViewBlog.addEventListener('click', () => switchView('blog-home'));
-  btnCreateShortcut.addEventListener('click', () => openEditor());
+  if (navDashboard) navDashboard.addEventListener('click', () => switchView('dashboard'));
+  if (navNewPost) navNewPost.addEventListener('click', () => openEditor());
+  if (navViewBlog) navViewBlog.addEventListener('click', () => switchView('blog-home'));
+  if (btnCreateShortcut) btnCreateShortcut.addEventListener('click', () => openEditor());
 
   // --- DATABASE EXPORT (JSON download) ---
-  navExportDb.addEventListener('click', () => {
-    try {
-      const jsonString = JSON.stringify(allPosts, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'posts.json';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      URL.revokeObjectURL(url);
-      showToast('File posts.json siap diunduh! Ganti file posts.json lama Anda dengan file baru ini.', 'success');
-    } catch (err) {
-      console.error(err);
-      showToast('Gagal melakukan ekspor data', 'error');
-    }
-  });
-
-  // Form Submission (Create or Edit)
-  postForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const title = postTitleInput.value.trim();
-    const category = postCategorySelect.value;
-    const status = postStatusSelect.value;
-    const summary = postSummaryTextarea.value.trim() || title.substring(0, 100) + '...';
-    const content = postContentTextarea.value.trim();
-    const editId = postIdInput.value;
-
-    const generateSlug = (t) => {
-      return t
-        .toLowerCase()
-        .replace(/[^a-z0-9 -]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-    };
-
-    const postData = {
-      title,
-      slug: generateSlug(title),
-      summary,
-      content,
-      category,
-      status
-    };
-
-    if (isStaticMode) {
-      // LocalStorage mode execution
-      if (editId) {
-        // Edit existing local record
-        const index = allPosts.findIndex(p => p.id === editId.toString());
-        if (index === -1) {
-          showToast('Data tidak ditemukan untuk diubah', 'error');
-          return;
-        }
-        allPosts[index] = {
-          ...allPosts[index],
-          ...postData,
-          updatedAt: new Date().toISOString()
-        };
-      } else {
-        // Create new local record
-        const newPost = {
-          id: Date.now().toString(),
-          ...postData,
-          date: new Date().toISOString()
-        };
-        allPosts.push(newPost);
-      }
-
-      // Sort chronological descending
-      allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
-      localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
-      
-      showToast(editId ? 'Postingan lokal diperbarui!' : 'Postingan lokal ditambahkan!', 'success');
-      showToast("Klik 'Ekspor JSON' di menu untuk menyimpan perubahan permanen ke database file.", 'warning');
-      
-      updateStats();
-      renderAdminTable(allPosts);
-      renderPublicBlogGrid();
-      switchView('dashboard');
-    } else {
-      // REST API server execution
-      if (editId) {
-        postData.id = editId;
-      }
-
+  if (navExportDb) {
+    navExportDb.addEventListener('click', () => {
       try {
-        const response = await fetch('/api/posts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(postData)
-        });
-
-        if (!response.ok) throw new Error('Respon server error');
-
-        showToast(editId ? 'Postingan berhasil diperbarui!' : 'Postingan baru berhasil ditambahkan!');
-        await fetchPosts();
-        switchView('dashboard');
+        const jsonString = JSON.stringify(allPosts, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'posts.json';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+        showToast('File posts.json siap diunduh! Ganti file posts.json lama Anda dengan file baru ini.', 'success');
       } catch (err) {
         console.error(err);
-        showToast('Gagal menyimpan postingan ke server API', 'error');
+        showToast('Gagal melakukan ekspor data', 'error');
       }
-    }
-  });
+    });
+  }
+
+  // Form Submission (Create or Edit)
+  if (postForm) {
+    postForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = postTitleInput.value.trim();
+      const category = postCategorySelect.value;
+      const status = postStatusSelect.value;
+      const summary = postSummaryTextarea.value.trim() || title.substring(0, 100) + '...';
+      const content = postContentTextarea.value.trim();
+      const editId = postIdInput.value;
+
+      const generateSlug = (t) => {
+        return t
+          .toLowerCase()
+          .replace(/[^a-z0-9 -]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-');
+      };
+
+      const postData = {
+        title,
+        slug: generateSlug(title),
+        summary,
+        content,
+        category,
+        status
+      };
+
+      if (isStaticMode) {
+        // LocalStorage mode execution
+        if (editId) {
+          // Edit existing local record
+          const index = allPosts.findIndex(p => p.id === editId.toString());
+          if (index === -1) {
+            showToast('Data tidak ditemukan untuk diubah', 'error');
+            return;
+          }
+          allPosts[index] = {
+            ...allPosts[index],
+            ...postData,
+            updatedAt: new Date().toISOString()
+          };
+        } else {
+          // Create new local record
+          const newPost = {
+            id: Date.now().toString(),
+            ...postData,
+            date: new Date().toISOString()
+          };
+          allPosts.push(newPost);
+        }
+
+        // Sort chronological descending
+        allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
+        
+        showToast(editId ? 'Postingan lokal diperbarui!' : 'Postingan lokal ditambahkan!', 'success');
+        showToast("Klik 'Ekspor JSON' di menu untuk menyimpan perubahan permanen.", 'warning');
+        
+        updateStats();
+        renderAdminTable(allPosts);
+        renderPublicBlogGrid();
+        switchView('dashboard');
+      } else {
+        // REST API server execution
+        if (editId) {
+          postData.id = editId;
+        }
+
+        try {
+          const response = await fetch('/api/posts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+          });
+
+          if (!response.ok) throw new Error('Respon server error');
+
+          showToast(editId ? 'Postingan berhasil diperbarui!' : 'Postingan baru berhasil ditambahkan!');
+          await fetchPosts();
+          switchView('dashboard');
+        } catch (err) {
+          console.error(err);
+          showToast('Gagal menyimpan postingan ke server API', 'error');
+        }
+      }
+    });
+  }
 
   // --- DELETE MODAL HANDLERS ---
-  btnCloseModal.addEventListener('click', () => {
-    deleteModal.classList.remove('open');
-    postToDeleteId = null;
-  });
-
-  btnConfirmDelete.addEventListener('click', async () => {
-    if (!postToDeleteId) return;
-
-    if (isStaticMode) {
-      // Local database deletion
-      allPosts = allPosts.filter(p => p.id !== postToDeleteId.toString());
-      localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
-      
-      showToast('Postingan dihapus secara lokal!');
-      showToast("Klik 'Ekspor JSON' di menu untuk menyimpan perubahan permanen ke database file.", 'warning');
-      
-      deleteModal.classList.remove('open');
+  if (btnCloseModal) {
+    btnCloseModal.addEventListener('click', () => {
+      if (deleteModal) deleteModal.classList.remove('open');
       postToDeleteId = null;
-      
-      updateStats();
-      renderAdminTable(allPosts);
-      renderPublicBlogGrid();
-      
-      if (currentView === 'reader') {
-        switchView('dashboard');
-      }
-    } else {
-      // REST API deletion
-      try {
-        const response = await fetch(`/api/posts/${postToDeleteId}`, {
-          method: 'DELETE'
-        });
+    });
+  }
 
-        if (!response.ok) throw new Error('Gagal menghapus');
+  if (btnConfirmDelete) {
+    btnConfirmDelete.addEventListener('click', async () => {
+      if (!postToDeleteId) return;
 
-        showToast('Postingan berhasil dihapus');
-        deleteModal.classList.remove('open');
+      if (isStaticMode) {
+        // Local database deletion
+        allPosts = allPosts.filter(p => p.id !== postToDeleteId.toString());
+        localStorage.setItem('minicms_posts', JSON.stringify(allPosts));
+        
+        showToast('Postingan dihapus secara lokal!');
+        showToast("Klik 'Ekspor JSON' di menu untuk menyimpan perubahan.", 'warning');
+        
+        if (deleteModal) deleteModal.classList.remove('open');
         postToDeleteId = null;
         
-        await fetchPosts();
+        updateStats();
+        renderAdminTable(allPosts);
+        renderPublicBlogGrid();
         
         if (currentView === 'reader') {
           switchView('dashboard');
         }
-      } catch (err) {
-        console.error(err);
-        showToast('Gagal menghapus postingan dari server', 'error');
+      } else {
+        // REST API deletion
+        try {
+          const response = await fetch(`/api/posts/${postToDeleteId}`, {
+            method: 'DELETE'
+          });
+
+          if (!response.ok) throw new Error('Gagal menghapus');
+
+          showToast('Postingan berhasil dihapus');
+          if (deleteModal) deleteModal.classList.remove('open');
+          postToDeleteId = null;
+          
+          await fetchPosts();
+          
+          if (currentView === 'reader') {
+            switchView('dashboard');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Gagal menghapus postingan dari server', 'error');
+        }
       }
-    }
-  });
+    });
+  }
 
   // Close modal when clicking outside card
-  deleteModal.addEventListener('click', (e) => {
-    if (e.target === deleteModal) {
-      deleteModal.classList.remove('open');
-      postToDeleteId = null;
-    }
-  });
+  if (deleteModal) {
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        deleteModal.classList.remove('open');
+        postToDeleteId = null;
+      }
+    });
+  }
 
   // --- UTILITIES ---
   function escapeHtml(text) {
